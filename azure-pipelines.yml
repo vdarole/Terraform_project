@@ -11,7 +11,7 @@ parameters:
     - prod
 
 - name: Apply or destroy
-  displayName: Select Action - Apply or destroy
+  displayName: Select Action - Apply or destroy resources
   type: string
   values:
     - plan
@@ -22,19 +22,37 @@ variables:
     - group: terraform-secrets
 
 stages:
-  - stage: TerraformInitPlan
-    displayName: Terraform Init & Plan
+  - stage: TerraformDeploymentBackendResource
+    displayName: Terraform plan deployment backend resource
     jobs:
       - job: init_plan
-        displayName: Terraform Init & Plan
+        displayName: Terraform plan deployment for backend storage account
         pool: default
         steps:
           - checkout: self
           - script: |
               cd backend-storage-account
               terraform init
+              terraform validate
               terraform plan
-            displayName: 'Terraform Init & Plan'
+            displayName: 'Terraform plan deployment for backend storage account'
+            env:
+              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+              ARM_TENANT_ID: $(ARM_TENANT_ID)
+
+      - job: apply
+        displayName: Terraform deployment for backend storage account
+        pool: default
+        dependsOn: init_plan
+        condition: succeeded()
+        steps:
+          - checkout: self
+          - script: |
+              cd backend-storage-account
+              terraform apply -auto-approve
+            displayName: 'Terraform deployment for backend storage account'
             env:
               ARM_CLIENT_ID: $(ARM_CLIENT_ID)
               ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
