@@ -6,7 +6,6 @@ parameters:
 - name: Environment
   displayName: Select environment to create infra resources
   type: string
-  default: 'uat'
   values:
     - uat
     - prod
@@ -14,8 +13,8 @@ parameters:
 - name: Apply or destroy
   displayName: Select Action - Apply or destroy
   type: string
-  default: 'apply'
   values:
+    - plan
     - apply
     - destroy
 
