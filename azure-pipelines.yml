@@ -31,10 +31,24 @@ stages:
         steps:
           - checkout: self
           - script: |
+              cd backend-storage-account
               terraform init
-              terraform workspace select ${{ parameters.environment }} || terraform workspace new ${{ parameters.environment }}
-              terraform plan -var-file=envs/"${{ parameters.environment }}/${{ parameters.environment }}-vars.tfvars" -out=tfplan
+              terraform plan
             displayName: 'Terraform Init & Plan'
+
+  # - stage: TerraformInitPlan
+  #   displayName: Terraform Init & Plan
+  #   jobs:
+  #     - job: init_plan
+  #       displayName: Terraform Init & Plan
+  #       pool: default
+  #       steps:
+  #         - checkout: self
+  #         - script: |
+  #             terraform init
+  #             terraform workspace select ${{ parameters.environment }} || terraform workspace new ${{ parameters.environment }}
+  #             terraform plan -var-file=envs/"${{ parameters.environment }}/${{ parameters.environment }}-vars.tfvars" -out=tfplan
+  #           displayName: 'Terraform Init & Plan'
 
   # - stage: TerraformApply
   #   displayName: Terraform Apply
