@@ -1,19 +1,87 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
 - main
 
-pool:
-  vmImage: ubuntu-latest
+parameters:
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- name: Environment
+  displayName: Select environment to create infra resources
+  type: string
+  default: 'uat'
+  values:
+    - uat
+    - prod
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- name: Apply or destroy
+  displayName: Select Action - Apply or destroy
+  type: string
+  default: 'apply'
+  values:
+    - apply
+    - destroy
+
+variables:
+    - group: terraform-secrets
+
+stages:
+  - stage: TerraformInitPlan
+    displayName: Terraform Init & Plan
+    jobs:
+      - job: init_plan
+        displayName: Terraform Init & Plan
+        pool: default
+        steps:
+          - checkout: self
+          - script: |
+              terraform init
+              terraform workspace select ${{ parameters.environment }} || terraform workspace new ${{ parameters.environment }}
+              terraform plan -var-file=envs/"${{ parameters.environment }}/${{ parameters.environment }}-vars.tfvars" -out=tfplan
+            displayName: 'Terraform Init & Plan'
+
+  # - stage: TerraformApply
+  #   displayName: Terraform Apply
+  #   dependsOn: TerraformInitPlan
+  #   condition: succeeded()
+  #   jobs:
+  #     - job: apply
+  #       displayName: Terraform Apply
+  #       pool: self-host-agent
+  #       steps:
+  #         - checkout: self
+
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '3.x'
+
+  #         - task: TerraformInstaller@1
+  #           inputs:
+  #             terraformVersion: '1.5.7'
+
+  #         - script: |
+  #             terraform init
+  #             terraform workspace select ${{ parameters.environment }}
+  #             terraform apply -auto-approve tfplan
+  #           displayName: 'Terraform Apply'
+
+  # - stage: TerraformDestroy
+  #   displayName: Terraform Destroy
+  #   condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'))
+  #   jobs:
+  #     - job: destroy
+  #       displayName: Terraform Destroy
+  #       pool: self-host-agent
+  #       steps:
+  #         - checkout: self
+
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '3.x'
+
+  #         - task: TerraformInstaller@1
+  #           inputs:
+  #             terraformVersion: '1.5.7'
+
+  #         - script: |
+  #             terraform init
+  #             terraform workspace select ${{ parameters.environment }}
+  #             terraform destroy -auto-approve -var-file="${{ parameters.environment }}.tfvars"
+  #           displayName: 'Terraform Destroy'
