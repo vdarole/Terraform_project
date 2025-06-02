@@ -51,6 +51,7 @@ stages:
           - checkout: self
           - script: |
               cd backend-storage-account
+              terraform init
               terraform apply -auto-approve
             displayName: 'Terraform deployment for backend storage account'
             env:
