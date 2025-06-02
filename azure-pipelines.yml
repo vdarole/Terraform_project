@@ -33,7 +33,7 @@ stages:
           - script: |
               terraform init
               terraform workspace select ${{ parameters.environment }} || terraform workspace new ${{ parameters.environment }}
-              terraform plan -var-file=./envs/${{ parameters.environment }}/{{ parameters.environment }}-vars.tfvars
+              terraform plan -var-file=./envs/${{ parameters.environment }}/${{ parameters.environment }}-vars.tfvars
             displayName: 'Terraform plan deployment'
             env:
               ARM_CLIENT_ID: $(ARM_CLIENT_ID)
@@ -51,7 +51,7 @@ stages:
           - script: |
               terraform init
               terraform workspace select ${{ parameters.environment }}
-              terraform apply -var-file=./envs/${{ parameters.environment }}/{{ parameters.environment }}-vars.tfvars -auto-approve
+              terraform apply -var-file=./envs/${{ parameters.environment }}/${{ parameters.environment }}-vars.tfvars -auto-approve
             displayName: 'Terraform apply deployment'
             env:
               ARM_CLIENT_ID: $(ARM_CLIENT_ID)
@@ -71,7 +71,7 @@ stages:
           - script: |
               terraform init
               terraform workspace select ${{ parameters.environment }}
-              terraform destroy -var-file=./envs/${{ parameters.environment }}/{{ parameters.environment }}-vars.tfvars -auto-approve
+              terraform destroy -var-file=./envs/${{ parameters.environment }}/${{ parameters.environment }}-vars.tfvars -auto-approve
             displayName: 'Terraform destroy deployment'
             env:
               ARM_CLIENT_ID: $(ARM_CLIENT_ID)
