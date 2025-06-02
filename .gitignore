@@ -1,4 +1,4 @@
 secrets.tfvars
-./backend-storage-account/secrets.tfvars
 *.tfstate*
 .terraform/
+*lock*
