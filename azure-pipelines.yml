@@ -61,31 +61,12 @@ stages:
               ARM_TENANT_ID: $(ARM_TENANT_ID)
 
   - stage: TerraformDestroyDeploymentBackendResource
-    displayName: Terraform destroy plan deployment backend resource
+    displayName: Terraform destroy deployment backend resource
     condition: eq('${{ parameters.action }}', 'destroy')
     jobs:
-      - job: init_plan_destroy
-        displayName: Terraform destroy plan deployment for backend storage account
-        pool: default
-        steps:
-          - checkout: self
-          - script: |
-              cd backend-storage-account
-              terraform init
-              terraform validate
-              terraform plan
-            displayName: 'Terraform destroy plan deployment for backend storage account'
-            env:
-              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
-              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
-              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
-              ARM_TENANT_ID: $(ARM_TENANT_ID)
-
-      - job: apply
+      - job: destroy
         displayName: Terraform destroy deployment for backend storage account
         pool: default
-        dependsOn: init_plan_destroy
-        condition: succeeded()
         steps:
           - checkout: self
           - script: |
