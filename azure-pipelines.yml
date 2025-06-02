@@ -1,7 +1,7 @@
 trigger:
 - main
 
-# parameters:
+parameters:
 
 # - name: Environment
 #   displayName: Select environment to create infra resources
@@ -10,22 +10,22 @@ trigger:
 #     - uat
 #     - prod
 
-# - name: Apply or destroy
-#   displayName: Select Action - Apply or destroy resources
-#   type: string
-#   values:
-#     - plan
-#     - apply
-#     - destroy
+- name: Action
+  displayName: Select Action - Apply or destroy resources
+  type: string
+  values:
+    - apply
+    - destroy
 
 variables:
     - group: terraform-secrets
 
 stages:
-  - stage: TerraformDeploymentBackendResource
+  - stage: TerraformApplyDeploymentBackendResource
     displayName: Terraform plan deployment backend resource
+    condition: eq('${{ parameters.action }}', 'apply')
     jobs:
-      - job: init_plan
+      - job: init_plan_apply
         displayName: Terraform plan deployment for backend storage account
         pool: default
         steps:
@@ -45,7 +45,7 @@ stages:
       - job: apply
         displayName: Terraform deployment for backend storage account
         pool: default
-        dependsOn: init_plan
+        dependsOn: init_plan_apply
         condition: succeeded()
         steps:
           - checkout: self
@@ -59,6 +59,47 @@ stages:
               ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
               ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
               ARM_TENANT_ID: $(ARM_TENANT_ID)
+
+  - stage: TerraformDestroyDeploymentBackendResource
+    displayName: Terraform destroy plan deployment backend resource
+    condition: eq('${{ parameters.action }}', 'destroy')
+    jobs:
+      - job: init_plan_destroy
+        displayName: Terraform destroy plan deployment for backend storage account
+        pool: default
+        steps:
+          - checkout: self
+          - script: |
+              cd backend-storage-account
+              terraform init
+              terraform validate
+              terraform plan
+            displayName: 'Terraform destroy plan deployment for backend storage account'
+            env:
+              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+              ARM_TENANT_ID: $(ARM_TENANT_ID)
+
+      - job: apply
+        displayName: Terraform destroy deployment for backend storage account
+        pool: default
+        dependsOn: init_plan_destroy
+        condition: succeeded()
+        steps:
+          - checkout: self
+          - script: |
+              cd backend-storage-account
+              terraform init
+              terraform destroy -auto-approve
+            displayName: 'Terraform deployment for backend storage account'
+            env:
+              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+              ARM_TENANT_ID: $(ARM_TENANT_ID)
+
+
 
   # - stage: TerraformInitPlan
   #   displayName: Terraform Init & Plan
