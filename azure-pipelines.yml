@@ -72,6 +72,7 @@ stages:
           - script: |
               cd backend-storage-account
               terraform init
+              terraform plan
               terraform destroy -auto-approve
             displayName: 'Terraform deployment for backend storage account'
             env:
