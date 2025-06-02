@@ -1,22 +1,22 @@
 trigger:
 - main
 
-parameters:
+# parameters:
 
-- name: Environment
-  displayName: Select environment to create infra resources
-  type: string
-  values:
-    - uat
-    - prod
+# - name: Environment
+#   displayName: Select environment to create infra resources
+#   type: string
+#   values:
+#     - uat
+#     - prod
 
-- name: Apply or destroy
-  displayName: Select Action - Apply or destroy resources
-  type: string
-  values:
-    - plan
-    - apply
-    - destroy
+# - name: Apply or destroy
+#   displayName: Select Action - Apply or destroy resources
+#   type: string
+#   values:
+#     - plan
+#     - apply
+#     - destroy
 
 variables:
     - group: terraform-secrets
