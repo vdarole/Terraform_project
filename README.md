@@ -1,6 +1,6 @@
 # Terraform Multi-Environment Provisioning
 
-This repository contains a Terraform project designed to provision resources across **two different environments** (e.g., `dev`, `prod`) using:
+This repository contains a Terraform project designed to provision resources across **two different environments** (e.g., `uat`, `prod`) using:
 
 - **Terraform Workspaces** for environment separation
 - **Remote Backend (Azure Storage Account)** to manage environment-specific state files
