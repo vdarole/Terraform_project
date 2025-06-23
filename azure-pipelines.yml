@@ -17,6 +17,8 @@ parameters:
     - apply
     - destroy
 
+pool: default
+
 variables:
     - group: terraform-secrets
 
@@ -27,7 +29,6 @@ stages:
     jobs:
       - job: init_plan
         displayName: Terraform plan deployment
-        pool: default
         steps:
           - checkout: self
           - script: |
@@ -41,40 +42,46 @@ stages:
               ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
               ARM_TENANT_ID: $(ARM_TENANT_ID)
 
-      - job: apply
+      - deployment: apply
         displayName: Terraform apply deployment
-        pool: default
         dependsOn: init_plan
         condition: succeeded()
-        steps:
-          - checkout: self
-          - script: |
-              terraform init
-              terraform workspace select ${{ parameters.environment }}
-              terraform apply -var-file=./envs/${{ parameters.environment }}/${{ parameters.environment }}-vars.tfvars -auto-approve
-            displayName: 'Terraform apply deployment'
-            env:
-              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
-              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
-              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
-              ARM_TENANT_ID: $(ARM_TENANT_ID)
+        environment: ${{ parameters.environment }} 
+        strategy:
+          runOnce:
+            deploy:      
+              steps:
+                - checkout: self
+                - script: |
+                    terraform init
+                    terraform workspace select ${{ parameters.environment }}
+                    terraform apply -var-file=./envs/${{ parameters.environment }}/${{ parameters.environment }}-vars.tfvars -auto-approve
+                  displayName: 'Terraform apply deployment'
+                  env:
+                    ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+                    ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+                    ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+                    ARM_TENANT_ID: $(ARM_TENANT_ID)
 
   - stage: TerraformDestroy
     displayName: Terraform destroy deployment
     condition: eq('${{ parameters.action }}', 'destroy')
     jobs:
-      - job: destroy
+      - deployment: destroy
         displayName: Terraform destroy deployment
-        pool: default
-        steps:
-          - checkout: self
-          - script: |
-              terraform init
-              terraform workspace select ${{ parameters.environment }}
-              terraform destroy -var-file=./envs/${{ parameters.environment }}/${{ parameters.environment }}-vars.tfvars -auto-approve
-            displayName: 'Terraform destroy deployment'
-            env:
-              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
-              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
-              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
-              ARM_TENANT_ID: $(ARM_TENANT_ID)
+        environment: ${{ parameters.environment }}
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - script: |
+                    terraform init
+                    terraform workspace select ${{ parameters.environment }}
+                    terraform destroy -var-file=./envs/${{ parameters.environment }}/${{ parameters.environment }}-vars.tfvars -auto-approve
+                  displayName: 'Terraform destroy deployment'
+                  env:
+                    ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+                    ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+                    ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+                    ARM_TENANT_ID: $(ARM_TENANT_ID)
