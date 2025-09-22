@@ -1,2 +1,2 @@
-name     = "rg-prod"
+name     = "RG-Prod"
 location = "East US"
