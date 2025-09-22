@@ -1,2 +1,2 @@
-name     = "rg-uat"
+name     = "RG-UAT"
 location = "East US"
