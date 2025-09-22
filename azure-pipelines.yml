@@ -7,15 +7,15 @@ parameters:
   displayName: Select environment to create infra resources
   type: string
   values:
-    - uat
-    - prod
+    - UAT
+    - Prod
 
 - name: action
   displayName: Select Action - Apply or destroy resources
   type: string
   values:
-    - apply
-    - destroy
+    - Apply
+    - Destroy
 
 pool: default
 
@@ -38,7 +38,7 @@ stages:
             displayName: 'Terraform plan deployment'
             env:
               ARM_CLIENT_ID: $(ARM_CLIENT_ID)
-              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET_VALUE)
               ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
               ARM_TENANT_ID: $(ARM_TENANT_ID)
 
